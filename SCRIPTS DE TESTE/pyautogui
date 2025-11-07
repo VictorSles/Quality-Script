@@ -2,7 +2,7 @@ import pyautogui as pg
 from time import sleep
 
 sleep(4)
-for x in range(0,410):
+for x in range(0,272):
     pg.moveTo(1084,456, duration=0.1)
     pg.click()
     pg.press("enter")
@@ -12,7 +12,7 @@ for x in range(0,410):
     pg.moveTo(511,101, duration=0.1)
     pg.click()
     pg.hotkey("ctrl", "v")
-    pg.moveTo(248,147, duration=0.1)
+    pg.moveTo(248,147, duration=0.2)
     pg.click()
     pg.sleep(20)
     pg.moveTo(1172,664, duration=0.1)

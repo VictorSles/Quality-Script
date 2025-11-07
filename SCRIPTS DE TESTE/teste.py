@@ -24,6 +24,7 @@ def get_token():
         if r.status_code == 200:
             token = r.text.strip()
             statusCode = r.status_code
+            print(token)
             return token
         else:
             print(f"Token não obtido: {statusCode}")
@@ -44,7 +45,7 @@ def criar_sessao():
             sessao = rq.Session()
             sessao.verify = False
             sessao.cookies.set(nome, valor)
-            sessao.headers.update ()
+            sessao.headers.update()
             sessao.headers.update({"Cache-Control": "no-cache"})
             return sessao
     except:

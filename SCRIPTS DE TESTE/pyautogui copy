@@ -1,0 +1,2 @@
+from tkinter import messagebox
+var = messagebox.showerror("Erro","TESTE")

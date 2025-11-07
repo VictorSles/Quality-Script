@@ -8,8 +8,8 @@ import warnings
 from datetime import datetime, timezone
 import subprocess
 from openpyxl import load_workbook
+from datetime import datetime, time
 import sys
-from datetime import time
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 # =======================
 # CONFIGURAÇÕES
@@ -424,46 +424,15 @@ def GetInfoByInjetResources(session, serial):
                         result[key_data] = op.get("StartDateTime", "N/A")
                         result[key_resource] = resource
     return result
-def definir_turno(datahora):
-    """
-    Retorna 'C.A' para 06:00-15:48 ou 'C.B' para o restante.
-    Suporta:
-        - strings ISO ou outras datas reconhecíveis pelo pandas
-        - objetos datetime
-        - timestamps (int/float)
-    Retorna 'N/A' se não puder interpretar.
-    """
-    try:
-        if not datahora or datahora == "N/A":
-            return "N/A"
 
-        # Converte tudo para datetime
-        if isinstance(datahora, datetime):
-            dt = datahora
-        elif isinstance(datahora, (int, float)):
-            dt = datetime.fromtimestamp(datahora)
-        else:
-            # strings ou outros tipos → tenta parse flexível
-            dt = pd.to_datetime(str(datahora), errors="coerce")
-            if pd.isna(dt):
-                return "N/A"
 
-        hora = dt.time()
-        # Turnos: C.A 06:00-15:48, C.B resto
-        if time(6, 0) <= hora <= time(15, 48):
-            return "C.A"
-        else:
-            return "C.B"
-    except Exception:
-        return "N/A"
 def format_info_line(info, linha, lado, oknok=None, defects=None, link_status=None):
     try:
         agora = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
     except Exception:
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S -0000")
-    turno = definir_turno(agora)
+
     parts = [f"{k}: {v}" for k, v in info.items() if k != "WipId"]
-    parts.append(f"Turno: {turno}")
     parts.append(f"Linha: {linha}")
     parts.append(f"Lado: {lado}")
     if oknok:
@@ -606,7 +575,6 @@ def format_datetime_with_timezone(value):
         return str(value).strip()
     except Exception:
         return str(value).strip()
-
 def export_from_txt_to_excel(log_files=None, excel_path=XLSX_FILE):
     import tkinter.messagebox as messagebox  # garante que messagebox funcione mesmo fora do GUI principal
 
@@ -657,15 +625,13 @@ def export_from_txt_to_excel(log_files=None, excel_path=XLSX_FILE):
             new_row["FailureLabel(s)"] = failures[i] if i < len(failures) else ""
             new_row["Input Defeito(s)"] = inputs[i] if i < len(inputs) else ""
             expanded_rows.append(new_row)
-
     expanded_df = pd.DataFrame(expanded_rows)
+    
     expanded_df["Turno"] = expanded_df["DataHoraProcessamento"].apply(definir_turno)
-
     # Padroniza datas/hora
     for col in expanded_df.columns:
         if any(keyword in col.lower() for keyword in ["data", "hora", "time"]):
             expanded_df[col] = expanded_df[col].apply(format_datetime_with_timezone)
-
     # =======================
     # ADICIONA COLUNA DE RESOURCES ESPECIAIS
     # =======================
