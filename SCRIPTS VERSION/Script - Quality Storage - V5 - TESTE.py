@@ -156,8 +156,6 @@ def get_token():
     except Exception as e:
         print("Erro get_token:", e)
         return None
-
-
 def build_session():
     token = get_token()
     if not token:
